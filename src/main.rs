@@ -1,10 +1,8 @@
+use anyhow::{Context, Result};
 use clap::Parser;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-
-#[derive(Debug)]
-struct CustomError(String);
 
 #[derive(Parser)]
 struct Cli {
@@ -12,15 +10,15 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() -> Result<(), CustomError> {
+fn main() -> Result<()> {
     let args = Cli::parse();
     let Cli { pattern, path } = args;
 
     let file_path = Path::new(&path);
 
     // open file
-    let file = File::open(file_path)
-        .map_err(|err| CustomError(format!("Error reading `{:?}`: {}", file_path, err)))?;
+    let file =
+        File::open(file_path).with_context(|| format!("Could not read file `{:?}`", file_path))?;
 
     let reader = BufReader::new(file);
 
@@ -29,10 +27,7 @@ fn main() -> Result<(), CustomError> {
         let line = match line_result {
             Ok(content) => content,
             Err(error) => {
-                return Err(CustomError(format!(
-                    "Error reading file: {:?}",
-                    error.to_string()
-                )));
+                return Err(error.into());
             }
         };
         if line.contains(&pattern) {
