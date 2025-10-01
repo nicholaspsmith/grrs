@@ -21,7 +21,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // iterate over lines
     for line_result in reader.lines() {
-        let line = line_result?;
+        let line = match line_result {
+            Ok(content) => content,
+            Err(error) => {
+                panic!("Can't deal with {}, exit here", error)
+            }
+        };
         if line.contains(&pattern) {
             println!("{}", line);
         }
