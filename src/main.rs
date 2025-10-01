@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file_path = Path::new(&path);
 
     // open file
-    let file = File::open(file_path)?;
+    let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
 
     // iterate over lines
@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let line = match line_result {
             Ok(content) => content,
             Err(error) => {
-                panic!("Can't deal with {}, exit here", error)
+                return Err(error.into());
             }
         };
         if line.contains(&pattern) {
